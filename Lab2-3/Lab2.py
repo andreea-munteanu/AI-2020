@@ -85,41 +85,40 @@ def createLabyrinth(n, m):
     draw()
     # check()
 
+# states: (matrix, n, m, xc, yc, xs, ys, xd, yd)
+
 # make current = start
-def initialState(xc, yc, xs, ys):
+def initialState(lab, n, m, xc, yc, xs, ys, xd, yd):
     xc = yc
     yc = ys
 
 # current = destination
-def finalState(xc, yc, xd, yd):
+def finalState(lab, n, m, xc, yc, xs, ys, xd, yd):
     return bool(xc == xd and yc == yd)
 
 # checks whether we can move from current position (xc, yc) to direction dir:
 # dir can be N = 1, S = 2, E = 4, W = 8
-def valid(xc, yc, xs, ys, xd, yd, dir):
-    # North
-    if dir == N:
-        return bool(xc - 1 < xd and yc > ys)
-    # South
-    elif dir == S:
-        return bool(xc + 1 < xd and yc > ys)
-    # East
-    elif dir == E:
-        return bool(xc < xd and yc + 1 < yd)
-    # West
-    elif dir == W:
-        return bool(xc < xd and yc - 1 > ys)
+def valid(lab, n, m, xc, yc, xs, ys, xd, yd):
+    return bool(0 <= xc < n and 0 <= yc < m)
 
 # transitioning from current position (xc, yc) to N / E / S / W by 1 position (if possible)
-def transition(xc, yc, xs, ys, xd, yd, dir):
+def transition(lab, n, m, xc, yc, xs, ys, xd, yd):
     dirs = [N, E, W, S]
+    for dir in dirs:
+        new_x = xc + GO_DIR[dir][0]
+        new_y = yc + GO_DIR[dir][1]
+        if valid(lab, n, m, new_x, new_y, xs, ys, xd, yd, dir) :
+            # checks if the new cell is not visited
+            lab[yc][xc] |= dir
+
 
 def main():
     print("Input: Lab[n][m], start(xs, ys), desination(xd, yd): ")
     n, m, xs, ys, xd, yd = input().split()
     createLabyrinth(n, m)
-    xc, yc = 0
+    xc, yc = 0, 0
     initialState(xc, yc, xs, ys)
+
 
 if __name__ == "__main__":
     main()
