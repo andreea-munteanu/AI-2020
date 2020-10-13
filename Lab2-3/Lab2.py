@@ -121,6 +121,8 @@ def transition(n, m, xc, yc, xs, ys, xd, yd, dir) :
         lab[yc][xc] |= dir
         xc = new_xc
         yc = new_yc
+        return True
+    return False
 
 
 def BKT(n, m, xc, yc, xs, ys, xd, yd) :
@@ -128,11 +130,14 @@ def BKT(n, m, xc, yc, xs, ys, xd, yd) :
     lab[xc][yc] |= '*'
     if finalState(n, m, xc, yc, xs, ys, xd, yd) :
         print('Found solution')
+        return True
     else:
-            # move by 1 position
-            transition(n, m, new_xc, new_yc, xs, ys, xd, yd, dir)
-            if inside(n, m, new_xc, new_yc) and isFree(new_xc, new_yc):
-                BKT(n, m, new_xc, new_yc, xs, ys, xd, yd)
+        for dir in directions:
+            # if transition has been made successfully, 
+            if transition(n, m, xc, yc, xs, ys, xd, yd, dir) :
+                xc_new = xc + GO_DIR[dir][0]
+                yc_new = yc + GO_DIR[dir][1]
+                return BKT(n, m, xc_new, yc_new, xs, ys, xd, yd)
     lab[xc][yc] |= a
 
 
