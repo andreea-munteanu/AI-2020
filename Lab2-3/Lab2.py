@@ -14,9 +14,12 @@ GO_DIR = {N : (0, -1), S : (0, 1), E : (1, 0), W : (-1, 0)}
 REVERSE = {E : W, W : E, N : S, S : N}
 # when a passage is dug from a cell, the other cell obtains the reverse passage, too
 
+directions = [N, E, W, S]
+
+
 # creating labyrinth n x m
-def createLabyrinth(n, m):
-    SIZE = (n, m)
+def createLabyrinth(n, m) :
+    SIZE = (int(n), int(m)) # n rows, m columns
     # size of the labyrinth (x, y)
 
     if sys.getrecursionlimit() < SIZE[0] * SIZE[1] :
@@ -85,43 +88,78 @@ def createLabyrinth(n, m):
     draw()
     # check()
 
+
 # states: (matrix, n, m, xc, yc, xs, ys, xd, yd)
 
 # make current = start
-def initialState(lab, n, m, xc, yc, xs, ys, xd, yd):
+def initialState(lab, n, m, xc, yc, xs, ys, xd, yd) :
     xc = yc
     yc = ys
 
+
 # current = destination
-def finalState(lab, n, m, xc, yc, xs, ys, xd, yd):
+def finalState(lab, n, m, xc, yc, xs, ys, xd, yd) :
     return bool(xc == xd and yc == yd)
+
 
 # checks whether we can move from current position (xc, yc) to direction dir:
 # dir can be N = 1, S = 2, E = 4, W = 8
-def valid(lab, n, m, xc, yc, xs, ys, xd, yd):
+def inside(lab, n, m, xc, yc, xs, ys, xd, yd) :
     return bool(0 <= xc < n and 0 <= yc < m)
 
+# checks if (xc, yc) has been visited before
+def isFree(lab, n, m, xc, yc, xs, ys, xd, yd) :
+    return lab[xc][yc] == 0
+
 # transitioning from current position (xc, yc) to N / E / S / W by 1 position (if possible)
-def transition(lab, n, m, xc, yc, xs, ys, xd, yd):
-    dirs = [N, E, W, S]
-    for dir in dirs:
-        new_x = xc + GO_DIR[dir][0]
-        new_y = yc + GO_DIR[dir][1]
-        if valid(lab, n, m, new_x, new_y, xs, ys, xd, yd, dir) :
-            # checks if the new cell is not visited
-            lab[yc][xc] |= dir
+def transition(lab, n, m, xc, yc, xs, ys, xd, yd, dir) :
+    # calculate new coordinates
+    new_x = xc + GO_DIR[dir][0]
+    new_y = yc + GO_DIR[dir][1]
+    if inside(lab, n, m, new_x, new_y, xs, ys, xd, yd) :
+        # checks if the new cell is not visited
+        lab[yc][xc] |= dir
+        lab[new_y][new_x] |= REVERSE[dir]
 
 
-def main():
-    print("Input: Lab[n][m], start(xs, ys), desination(xd, yd): ")
+def BKT(lab, n, m, xc, yc, xs, ys, xd, yd, dir) :
+    lab[xc][yc] |= dir
+
+
+""" void BKT(int x, int y, int k)
+{
+    int xv,yv;
+    st[k].x=x;
+    st[k].y=y;
+    a[x][y]=1; ///se marcheaza punctul
+    if (x==xc && y==yc) afis(k);
+    else for (int i=0; i<=3; ++i)
+    {
+        ///se calculeaza vecinii
+        xv=x+dx[i];
+        yv=y+dy[i];
+        ///daca vecinii sunt nemarcati pe harta (adica drumul e liber), soricelul se deplaseaza cu o pozitie in sensul acelor de ceasornic (N,E,S,V)
+        if (interior(xv,yv) && a[xv][yv]==0) BKT(xv,yv,k+1);
+    }
+    a[x][y]=0; ///operatia complementara
+}
+"""
+
+
+def BFS(lab, n, m, xc, yc, xs, ys, xd, yd) :
+    print("None =) ")
+
+def HillClimbing(lab, n, m, xc, yc, xs, ys, xd, yd):
+    print('none =)')
+
+
+def main() :
+    print("Input: n, m, start(xs, ys), desination(xd, yd): ")
     n, m, xs, ys, xd, yd = input().split()
+    lab = None
     createLabyrinth(n, m)
-    xc, yc = 0, 0
-    initialState(xc, yc, xs, ys)
+    initialState(lab, n, m, xs, ys, xs, ys, xd, yd)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__" :
     main()
-
-
-
