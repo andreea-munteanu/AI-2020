@@ -13,7 +13,7 @@ if sys.getrecursionlimit() < SIZE[0] * SIZE[1] :
 # if max recursion limit is lower than needed, adjust it
 sys.setrecursionlimit(30000)
 
-my_list = [0] * 55 + [1] * 45
+my_list = [0] * 55 + [1] * 45            # weights
 # initializing labyrinth with 0s and 1s at weighted random
 lab = list(list(random.choice(my_list) for i in range(SIZE[0])) for j in range(SIZE[1]))
 
@@ -49,7 +49,7 @@ def print_labyrinth(xs, ys, xd, yd) :
                 print(' ', end=' ')
             # obstacle
             else :
-                print('*', end=' ')
+                print('∎', end=' ')
         print('|', j, end='\n')
 
 
@@ -101,7 +101,7 @@ def inside(xc, yc, n, m) :
 visited = []
 
 
-# checks if (xc, yc) has been visited before
+# checks if (xc, yc) has been visited before: visited = False, not visited = true
 def not_visited(xc, yc) :
     for i in range(len(visited), 2) :
         if visited[i] == xc and visited[i + 1] == yc :
@@ -113,7 +113,7 @@ def not_visited(xc, yc) :
 def valid_transition(xc, yc) :
     return inside(xc, yc, n, m) and not_visited(xc, yc)
 
-
+# TRANSITION FUNCTION
 def transition(xc, yc, x_new, y_new) :
     xc = x_new
     yc = y_new
