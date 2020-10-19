@@ -1,7 +1,6 @@
 import random
 import sys
 from queue import Queue
-from matplotlib import collections
 
 n = 20
 m = 30
@@ -14,22 +13,35 @@ if sys.getrecursionlimit() < SIZE[0] * SIZE[1] :
 # if max recursion limit is lower than needed, adjust it
 sys.setrecursionlimit(30000)
 
-
-# initializing labyrinth with 0s and 1s at random
-lab = list(list(random.randrange(2) for i in range(SIZE[0])) for j in range(SIZE[1]))
+my_list = [0] * 70 + [1] * 30
+# initializing labyrinth with 0s and 1s at weighted random
+lab = list(list(random.choice(my_list) for i in range(SIZE[0])) for j in range(SIZE[1]))
 
 
 def print_labyrinth() :
+    print("    ", end='')
+    for i in range(n):
+        if i < n-1:
+            print(i, end=' ')
+        else:
+            print(i)
+    print("    ", end='')
+    for i in range(2*n):
+        print("_", end='')
+    print('')
+
     for j in range(m) :
+        if j < 10:
+            print(j, " |", end='')
+        else:
+            print(j, "|", end= '')
         # print("| ", end='')
         for i in range(n) :
             if lab[j][i] == 0 :
                 print(lab[j][i], end=' ')
-                # print(colored(lab[j][i]), 'blue')
             else :
                 print('*', end=' ')
-                # print(colored(lab[j][i], 'red'))
-        print('', end='\n')
+        print('|', j, end='\n')
 
 
 print("\nYour labyrinth is: ")
