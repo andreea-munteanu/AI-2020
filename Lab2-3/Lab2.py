@@ -92,32 +92,29 @@ def finalState(xc, yc, xd, yd) :
    _________________________________________________________________________________________________________
 """
 
-
-# checks if (xc, yc) is within bounds
-def inside(xc, yc, n, m) :
-    return 0 <= xc < n and 0 <= yc < m
-
-
 visited = []
 
+# checks if (xc, yc) is within bounds
+def inside(x, y):
+    return 0 <= x < n and 0 <= y < m
 
 # checks if (xc, yc) has been visited before: visited = False, not visited = true
-def not_visited(xc, yc) :
+def not_visited(x, y):
     for i in range(len(visited), 2) :
-        if visited[i] == xc and visited[i + 1] == yc :
+        if visited[i] == x and visited[i + 1] == y :
             return False
     return True
 
-
 # validate transition
-def valid_transition(xc, yc) :
-    return inside(xc, yc, n, m) and not_visited(xc, yc)
+def valid_transition(x, y) :
+    return inside(x, y) and not_visited(x, y)
 
-# TRANSITION FUNCTION
-def transition(xc, yc, x_new, y_new) :
+# TRANSITION FUNCTION (returns new state)
+def transition(x_new, y_new, xs, ys, xd, yd) :
     xc = x_new
     yc = y_new
-    return xc, yc
+    # current position becomes (x_new, y_new)
+    return xc, yc, xs, ys, xd, yd
 
 
 N, S, E, W = 1, 2, 4, 8
@@ -144,7 +141,7 @@ def print_BKT_path(xs, ys, xd, yd, stack) :
         # printing stack for check
         print("(", stack[i], ", ", stack[i + 1], ")", end='; ')
         # marking path with '+'
-        lab[stack[i]][stack[i + 1]] = '1'
+        lab[stack[i]][stack[i + 1]] = 1
     # printing resulting path
     print("\nBKT path: ")
     print_labyrinth(xs, ys, xd, yd)
@@ -154,27 +151,34 @@ def print_BKT_path(xs, ys, xd, yd, stack) :
 
 
 def BKT(xc, yc, xs, ys, xd, yd) :
+    # add current position to stack
     BKT_stack.append(xc)
     BKT_stack.append(yc)
+    # mark cell as visited
     visited.append(xc)
     visited.append(yc)
     lab[xc][yc] = '1'
+    # check if current state is final
     if finalState(xc, yc, xd, yd) :
         print('Found solution: ')
         print_BKT_path(xs, ys, xd, yd, BKT_stack)
         return True
+    # check the neighbouring cells
     else :
-        for direction in directions :
+        for direction in directions :       # N, E, W, S
             # if transition has been made successfully, move to new position
             sum_x = [GO_DIR[direction][0], xc]
             sum_y = [GO_DIR[direction][1], yc]
 
-            xc_new = sum(sum_x)  # xc_new = GO_DIR[direction][0] + xc
-            yc_new = sum(sum_y)  # yc_new = GO_DIR[direction][1] + yc
+            # neighbour coordinates:
+            xc_new = sum(sum_x)
+            yc_new = sum(sum_y)
 
+            # if transition can be done, perform
             if valid_transition(xc_new, yc_new) :
-                new_x, new_y = transition(xc_new, yc_new, xc_new, yc_new)
+                new_x, new_y, xs, ys, xd, yd = transition(xc_new, yc_new, xs, ys, xd, yd)
                 return BKT(new_x, new_y, xs, ys, xd, yd)
+    # complementary operations
     lab[xc][yc] = '0'
     BKT_stack.pop()
     BKT_stack.pop()
@@ -194,16 +198,33 @@ class Point(object) :
 
 def BFS(xc, yc, xs, ys, xd, yd) :
     q = Queue(maxsize=10000)
-    position = Point(xc, yc)
+    current_position = Point(xc, yc)
     BFS_visited = set()
-    BFS_visited.add(position)
-    q.put(position)
+    BFS_visited.add(current_position)
+    q.put(current_position)
     while q :
         u = q.get()
         # calculate neighbours of u, check if they are visited
-        for i in range(4) :
+        for dir in directions :
             # directions N, S, E, W
-            print("new line")
+            sum_x = [GO_DIR[dir][0], u.x]
+            sum_y = [GO_DIR[dir][1], u.y]
+            # neighbour coordinates:
+            x_neigh = sum(sum_x)
+            y_neigh = sum(sum_y)
+            neighbour = Point(x_neigh, y_neigh)
+            if neighbour not in q:
+                BFS_visited.add(neighbour)
+                q.put(neighbour)
+    return BFS_visited
+
+"""_________________________________________________________________________________________________________
+                                            5. HILLCLIMBING STRATEGY
+   _________________________________________________________________________________________________________
+"""
+
+def HillClimbing(xc, yc, xs, ys, xd, yd) :
+    
 
 
 def main() :
@@ -223,5 +244,3 @@ def main() :
 
 if __name__ == "__main__" :
     main()
-
-    
