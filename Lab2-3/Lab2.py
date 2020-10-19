@@ -1,157 +1,203 @@
 import random
 import sys
+from queue import Queue
+from matplotlib import collections
+
+n = 20
+m = 30
+print("n = ", n, "m = ", m)
+SIZE = (n, m)  # n rows, m columns
+
+if sys.getrecursionlimit() < SIZE[0] * SIZE[1] :
+    sys.setrecursionlimit(SIZE[0] * SIZE[1])
+
+# if max recursion limit is lower than needed, adjust it
+sys.setrecursionlimit(30000)
+
+
+# initializing labyrinth with 0s and 1s at random
+lab = list(list(random.randrange(2) for i in range(SIZE[0])) for j in range(SIZE[1]))
+
+
+def print_labyrinth() :
+    for j in range(m) :
+        # print("| ", end='')
+        for i in range(n) :
+            if lab[j][i] == 0 :
+                print(lab[j][i], end=' ')
+                # print(colored(lab[j][i]), 'blue')
+            else :
+                print('*', end=' ')
+                # print(colored(lab[j][i], 'red'))
+        print('', end='\n')
+
+
+print("\nYour labyrinth is: ")
+print_labyrinth()
+print("\n\n")
+print("\nChoose start(xs, ys) and destination (xd, yd): ", end='')
+xs, ys, xd, yd = input().split()
+
+xs = int(xs)
+ys = int(ys)
+xd = int(xd)
+yd = int(yd)
+
+found = False
 
 # (xc, yc) - current position
 # (xs, ys) - start position
 # (xd, yd) - destination
 
+"""_________________________________________________________________________________________________________
+                                                    1. STATE
+          (xc , yc , xs , ys , xd , yd , found)
+     ______________ _________ ___________ ___________________________
+     current state |  start  |destination| reached final state (bool)
+
+
+
+    _________________________________________________________________________________________________________
+                              2. INITIALIZATION, INITIAL/FINAL STATE, CHECK_FINAL()
+
+2.2. initial state: current position is start(xs, ys)
+    _________________________________________________________________________________________________________
+"""
+
+
+# 2.1.initialization
+def initialState(xc, yc, xs, ys, xd, yd, found) :
+    xc = xs
+    yc = ys
+    found = False
+    return xc, yc, xs, ys, xd, yd, found
+
+
+# 2.3. bool function checking whether a state is final
+def finalState(xc, yc, xd, yd) :
+    return xc == xd and yc == yd
+
+
+"""_________________________________________________________________________________________________________
+                                            3. TRANSITION FUNCTION
+
+    3.1. validation function (bool)
+    3.2. transition function returning current state
+   _________________________________________________________________________________________________________
+"""
+
+
+# checks if (xc, yc) is within bounds
+def inside(xc, yc, n, m) :
+    return 0 <= xc < n and 0 <= yc < m
+
+
+visited = []
+
+
+# checks if (xc, yc) has been visited before
+def not_visited(xc, yc) :
+    for i in range(len(visited), 2) :
+        if visited[i] == xc and visited[i + 1] == yc :
+            return False
+    return True
+
+
+# validate transition
+def valid_transition(xc, yc) :
+    return inside(xc, yc, n, m) and not_visited(xc, yc)
+
+
+def transition(xc, yc, x_new, y_new) :
+    xc = x_new
+    yc = y_new
+    return xc, yc
+
+
 N, S, E, W = 1, 2, 4, 8
-# directions translated into bitnums to store information on all cleared walls in one variable per cell
 
-GO_DIR = {N : (0, -1), S : (0, 1), E : (1, 0), W : (-1, 0)}
+GO_DIR = {N : (0, -1),
+          S : (0, 1),
+          E : (1, 0),
+          W : (-1, 0)}
 # dictionary with directions translated to digging moves
-
-REVERSE = {E : W, W : E, N : S, S : N}
-# when a passage is dug from a cell, the other cell obtains the reverse passage, too
 
 directions = [N, E, W, S]
 
-n, m, xs, ys, xd, yd = input().split()
-
-# creating labyrinth n x m
-SIZE = (n, m) # n rows, m columns
-# size of the labyrinth (x, y)
-
-if sys.getrecursionlimit() < SIZE[0] * SIZE[1] :
-    sys.setrecursionlimit(SIZE[0] * SIZE[1])
-# if max recursion limit is lower than needed, adjust it
-
-lab = list(list(0 for i in range(SIZE[0])) for j in range(SIZE[1]))
-
-# labyrinth is prepared
-def dig(x, y) :
-    # digs passage from a cell (x, y) in an unvisited cell
-    dirs = [N, E, W, S]
-    random.shuffle(dirs)
-    # shuffles directions each time for more randomness
-    for dir in dirs :
-        new_x = x + GO_DIR[dir][0]
-        new_y = y + GO_DIR[dir][1]
-        if (new_y in range(SIZE[1])) and \
-                (new_x in range(SIZE[0])) and \
-                (lab[new_y][new_x] == 0) :
-            # checks if the new cell is not visited
-            lab[y][x] |= dir
-            lab[new_y][new_x] |= REVERSE[dir]
-            # if so, apply info on passages to both cells
-            dig(new_x, new_y)
-            # repeat recursively
-
-def check() :
-    # displays the cells' values for check-up
-    for i in range(SIZE[1]) :
-        for j in range(SIZE[0]) :
-            print(" " * (1 - (lab[i][j] // 10)) + \
-                  str(lab[i][j]), end='|')
-        print('')
-
-def draw() :
-    # displays the labyrinth
-    print("\nLabyrinth of Kuba #" + str(seed) + " (" + str(SIZE[0]) + "x" + str(SIZE[1]) + ")")
-    # prints the seed (for reference) and the lab size
-    print("_" * (SIZE[0] * 2))
-    for j in range(SIZE[1]) :
-        if j != 0 :
-            print("|", end='')
-        else :
-            print("_", end='')
-        for i in range(SIZE[0]) :
-            if lab[j][i] & S != 0 :
-                print(" ", end='')
-            else :
-                print("_", end='')
-            if lab[j][i] & E != 0 :
-                if (lab[j][i] | lab[j][i + 1]) & S != 0 :
-                    print(" ", end='')
-                else :
-                    print("_", end='')
-            elif (j == SIZE[1] - 1) & (i == SIZE[0] - 1) :
-                print("_", end='')
-            else :
-                print("|", end='')
-        print("")
-
-# Let's start!
-seed = random.randint(0, 1000)
-random.seed(seed)
-dig(SIZE[0] // 2, SIZE[1] // 2)
-draw()
-# check()
+"""_________________________________________________________________________________________________________
+                                            4. BACKTRACKING STRATEGY
+   _________________________________________________________________________________________________________
+"""
 
 
-# states: (matrix, n, m, xc, yc, xs, ys, xd, yd)
-
-# make current = start
-def initialState(n, m, xc, yc, xs, ys, xd, yd) :
-    xc = xs
-    yc = ys
+BKT_stack = []
 
 
-# current = destination
-def finalState(n, m, xc, yc, xs, ys, xd, yd) :
-    if xc == xd and yc == yd:
+def print_BKT_path(stack) :
+    # stack contains indices (i,j) of the path --> requires step = 2
+    for i in range(len(stack), 2) :
+        # printing stack for check
+        print("(", stack[i], ", ", stack[i + 1], ")", end='; ')
+        # marking path with '+'
+        lab[stack[i]][stack[i + 1]] = '+'
+    # printing resulting path
+    print("\nBKT path: ")
+    print_labyrinth()
+    # changing matrix to original
+    for i in range(len(stack), 2) :
+        lab[stack[i]][stack[i + 1]] = '0'
+
+def BKT(xc, yc, xs, ys, xd, yd) :
+    BKT_stack.append(xc)
+    BKT_stack.append(yc)
+    visited.append(xc)
+    visited.append(yc)
+    if finalState(xc, yc, xd, yd) :
+        print('Found solution: ')
+        print_BKT_path(BKT_stack)
         return True
-    return False
-
-# checks whether we can move from current position (xc, yc) to direction dir:
-# dir can be N = 1, S = 2, E = 4, W = 8
-def inside(n, m, xc, yc) :
-    return bool(0 <= xc < n and 0 <= yc < m)
-
-# checks if (xc, yc) has been visited before
-def isFree(xc, yc) :
-    return bool(lab[xc][yc] == 0)
-
-# transitioning from current position (xc, yc) to N / E / S / W by 1 position (if possible) + marking
-def transition(n, m, xc, yc, xs, ys, xd, yd, dir) :
-    # calculate new coordinates
-    new_xc = xc + GO_DIR[dir][0]
-    new_yc = yc + GO_DIR[dir][1]
-    if inside(n, m, new_xc, new_yc) and isFree(new_xc, new_yc) :
-        lab[yc][xc] |= dir
-        xc = new_xc
-        yc = new_yc
-        return True
-    return False
+    else :
+        for direction in directions :
+            # if transition has been made successfully, move to new position
+            sum_x = [GO_DIR[direction][0], xc]
+            sum_y = [GO_DIR[direction][1], yc]
+            xc_new = sum(sum_x) # xc_new = GO_DIR[direction][0] + xc
+            yc_new = sum(sum_y)
+            if valid_transition(xc_new, yc_new) :
+                new_x, new_y = transition(xc_new, yc_new, xc_new, yc_new)
+                BKT(new_x, new_y, xs, ys, xd, yd)
+    BKT_stack.pop()
+    BKT_stack.pop()
 
 
-def BKT(n, m, xc, yc, xs, ys, xd, yd) :
-    a = lab[xc][yc]
-    lab[xc][yc] |= '*'
-    if finalState(n, m, xc, yc, xs, ys, xd, yd) :
-        print('Found solution')
-        return True
-    else:
-        for dir in directions:
-            # if transition has been made successfully, 
-            if transition(n, m, xc, yc, xs, ys, xd, yd, dir) :
-                xc_new = xc + GO_DIR[dir][0]
-                yc_new = yc + GO_DIR[dir][1]
-                return BKT(n, m, xc_new, yc_new, xs, ys, xd, yd)
-    lab[xc][yc] |= a
+BKT(xs, ys, xs, ys, xd, yd)
+
+"""_________________________________________________________________________________________________________
+                                            5. BFS STRATEGY
+   _________________________________________________________________________________________________________
+"""
 
 
-def BFS(n, m, xc, yc, xs, ys, xd, yd) :
-    print("None =) ")
+class Point(object):
+    def __init__(self, x, y) :
+        self.x = x
+        self.y = y
 
-def HillClimbing(n, m, xc, yc, xs, ys, xd, yd):
-    print('none =)')
+def BFS(xc, yc, xs, ys, xd, yd):
+    q = Queue(maxsize=10000)
+    position = Point(xc, yc)
+    BFS_visited = set()
+    BFS_visited.add(position)
+    q.put(position)
+    while q:
+        u = q.get()
+        # calculate neighbours of u, check if they are visited
+        for i in range(4):
+            # directions N, S, E, W
+            print("new line")
 
 
-def main() :
-    print("Input: n, m, start(xs, ys), desination(xd, yd): ")
-    initialState(n, m, xs, ys, xs, ys, xd, yd)
 
 
-if __name__ == "__main__" :
-    main()
+
+
