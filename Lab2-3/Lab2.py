@@ -55,9 +55,9 @@ def print_labyrinth(xs, ys, xd, yd) :
 
 """_________________________________________________________________________________________________________
                                                     1. STATE
-          (xc , yc , xs , ys , xd , yd , found)
-     ______________ _________ ___________ ___________________________
-     current state |  start  |destination| reached final state (bool)
+          (xc , yc , xs , ys , xd , yd)
+     ______________ _________ ___________ 
+     current state |  start  |destination| 
     
     # (xc, yc) - current position
     # (xs, ys) - start position
@@ -72,11 +72,10 @@ def print_labyrinth(xs, ys, xd, yd) :
 
 
 # 2.1.initialization + returning state
-def initialState(xc, yc, xs, ys, xd, yd, found) :
+def initialState(xc, yc, xs, ys, xd, yd) :
     xc = xs
     yc = ys
-    found = False
-    return xc, yc, xs, ys, xd, yd, found
+    return xc, yc, xs, ys, xd, yd
 
 
 # 2.3. bool function checking whether a state is final
@@ -113,7 +112,7 @@ def valid_transition(x, y) :
 def transition(x_new, y_new, xs, ys, xd, yd) :
     xc = x_new
     yc = y_new
-    # current position becomes (x_new, y_new)
+    # current position (xc, yc) becomes (x_new, y_new)
     return xc, yc, xs, ys, xd, yd
 
 
@@ -140,8 +139,7 @@ def print_BKT_path(xs, ys, xd, yd, stack) :
     for i in range(len(stack), 2) :
         # printing stack for check
         print("(", stack[i], ", ", stack[i + 1], ")", end='; ')
-        # marking path with '+'
-        lab[stack[i]][stack[i + 1]] = 1
+        lab[stack[i]][stack[i + 1]] = '1'
     # printing resulting path
     print("\nBKT path: ")
     print_labyrinth(xs, ys, xd, yd)
@@ -157,7 +155,7 @@ def BKT(xc, yc, xs, ys, xd, yd) :
     # mark cell as visited
     visited.append(xc)
     visited.append(yc)
-    lab[xc][yc] = '1'
+    lab[yc][xc] = '1'
     # check if current state is final
     if finalState(xc, yc, xd, yd) :
         print('Found solution: ')
@@ -179,7 +177,7 @@ def BKT(xc, yc, xs, ys, xd, yd) :
                 new_x, new_y, xs, ys, xd, yd = transition(xc_new, yc_new, xs, ys, xd, yd)
                 return BKT(new_x, new_y, xs, ys, xd, yd)
     # complementary operations
-    lab[xc][yc] = '0'
+    lab[yc][xc] = '0'
     BKT_stack.pop()
     BKT_stack.pop()
 
@@ -218,28 +216,41 @@ def BFS(xc, yc, xs, ys, xd, yd) :
                 q.put(neighbour)
     return BFS_visited
 
+def print_BFS_path(xs, ys, xd, yd, BFS_visited):
+    # BFS_visited() is a set containing the visited cells (in order)
+    initial_set = set()
+    for i in range(len(BFS_visited)) :
+        v = BFS_visited.pop()
+        initial_set.add(v)
+        lab[v.y][v.x] = '1'
+    # printing resulting path
+    print("\nBFS path: ")
+    print_labyrinth(xs, ys, xd, yd)
+    # changing matrix to original
+    for i in range(len(initial_set)) :
+        v = initial_set.pop()
+        lab[v.y][v.x] = '0'
+
+
+
 """_________________________________________________________________________________________________________
                                             5. HILLCLIMBING STRATEGY
    _________________________________________________________________________________________________________
 """
 
 def HillClimbing(xc, yc, xs, ys, xd, yd) :
-    
+    print('nothing here :) ')
 
 
 def main() :
-    found = False
     print("\nChoose start(xs, ys) and destination (xd, yd): ", end='')
     xs, ys, xd, yd = input().split()
-    xs = int(xs)
-    ys = int(ys)
-    xd = int(xd)
-    yd = int(yd)
-    lab[xs][ys] = 5
-    lab[xd][yd] = 4
     print("\nYour labyrinth is: ")
     print_labyrinth(xs, ys, xd, yd)
-    BKT(xs, ys, xs, ys, xd, yd)
+
+    BFS(xs, ys, xs, ys, xd, yd)
+    BFS_set = BFS(xs, ys, xs, ys, xd, yd)
+    print_BFS_path(xs,ys, xd, yd, BFS_set)
 
 
 if __name__ == "__main__" :
