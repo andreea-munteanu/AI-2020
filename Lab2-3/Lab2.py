@@ -4,6 +4,8 @@ from queue import Queue
 
 n = 12
 m = 15
+# n = 4
+# m = 4
 print("n = ", n, "m = ", m)
 SIZE = (n, m)  # n rows, m columns
 
@@ -16,7 +18,7 @@ sys.setrecursionlimit(30000)
 my_list = [0] * 55 + [1] * 45  # weights
 # initializing labyrinth with 0s and 1s at weighted random
 lab = list(list(random.choice(my_list) for i in range(SIZE[0])) for j in range(SIZE[1]))
-
+# lab = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
 
 # parameters: start, destination
 def print_labyrinth(xs, ys, xd, yd) :
@@ -48,8 +50,10 @@ def print_labyrinth(xs, ys, xd, yd) :
             elif lab[j][i] == 0 :
                 print(' ', end=' ')
             # obstacle
-            else :
+            elif lab[j][i] == 1:
                 print('∎', end=' ')
+            else: # lab[i][j] == 2
+                print("+", end=' ')
         print('|', j, end='\n')
 
 
@@ -109,18 +113,18 @@ def not_visited(x, y) :
 
 def is_obstacle(x, y) :
     if 0 <= x < n and 0 <= y < m:
-        return lab[x][y] == 1
+        return lab[x][y] == 1 or lab[x][y] == 2
     else:
         return True
 
 
 # validate transition
 def valid_transition(x, y) :
-    return inside(x, y) and not_visited(x, y) and is_obstacle(x, y) == False
+    return inside(x, y) and not_visited(x, y) and is_obstacle(x, y) is False
 
-def valid_transition_for_bkt(x,y):
+def valid_transition_for_bkt(x, y):
     if inside(x, y):
-        return is_obstacle(x, y) == False
+        return is_obstacle(x, y) is False
     return False
 
 # TRANSITION FUNCTION (returns new state)
@@ -154,7 +158,7 @@ def print_BKT_path(xs, ys, xd, yd, stack) :
     for i in range(0, len(stack), 2) :
         # printing stack for check
         print("(", stack[i], ", ", stack[i + 1], ")", end='; ')
-        lab[stack[i]][stack[i + 1]] = 1
+        lab[stack[i]][stack[i + 1]] = 2
     # printing resulting path
     print("\nBKT path: ")
     print_labyrinth(xs, ys, xd, yd)
@@ -164,13 +168,11 @@ def print_BKT_path(xs, ys, xd, yd, stack) :
 
 
 def BKT(xc, yc, xs, ys, xd, yd) :
-    # add current position to stack
-    # BKT_stack.append(xc)
-    # BKT_stack.append(yc)
+    # add current position to stack (for future printing)
+    BKT_stack.append(xc)
+    BKT_stack.append(yc)
     # # mark cell as visited
-    # visited.append(xc)
-    # visited.append(yc)
-    lab[xc][yc] = 1
+    lab[xc][yc] = 2  # path
     # check if current state is final
     if finalState(xc, yc, xd, yd) :
         print('Found solution: ')
@@ -195,10 +197,8 @@ def BKT(xc, yc, xs, ys, xd, yd) :
                     return True
     # complementary operations
     lab[xc][yc] = 0
-    # BKT_stack.pop()
-    # BKT_stack.pop()
-    # visited.pop()
-    # visited.pop()
+    BKT_stack.pop()
+    BKT_stack.pop()
 
 
 """_________________________________________________________________________________________________________
@@ -243,7 +243,7 @@ def print_BFS_path(xs, ys, xd, yd, BFS_visited) :
     for i in range(len(BFS_visited)) :
         v = BFS_visited.pop()
         initial_set.add(v)
-        lab[v.y][v.x] = 1
+        lab[v.y][v.x] = 2  # path
     # printing resulting path
     print("\nBFS path: ")
     print_labyrinth(xs, ys, xd, yd)
@@ -278,7 +278,7 @@ def main() :
     print_labyrinth(xs, ys, xd, yd)
     # BKT
     if not BKT(xs, ys, xs, ys, xd, yd):
-        print("nu am gasit solutie")
+        print("Solution does not exist")
     # BFS
     # BFS(xs, ys, xs, ys, xd, yd)
     # BFS_set = BFS(xs, ys, xs, ys, xd, yd)
