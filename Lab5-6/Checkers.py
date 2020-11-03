@@ -1,7 +1,7 @@
 import pygame
 import os
 
-os.startfile(r"D:\Facultate\Anul_3\AI\Lab 5-6\Exemplu\SimpleCheckers.exe")
+# os.startfile(r"D:\Facultate\Anul_3\AI\Lab 5-6\Exemplu\SimpleCheckers.exe")
 
 # INITIALIZE GAME
 pygame.init()
@@ -16,12 +16,11 @@ GREEN = (0, 255, 0)
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
-screen = pygame.display.set_mode((WIDTH, HEIGHT))  # window dimensions
-pygame.display.set_caption('Simple Checkers')  # title
-icon = pygame.image.load('board.png')  # icon
+screen = pygame.display.set_mode((WIDTH, HEIGHT))   # window dimensions
+pygame.display.set_caption('Simple Checkers')       # title
+icon = pygame.image.load('board.png')               # icon
 pygame.display.set_icon(icon)
 board = [[2, 2, 2, 2], [0, 0, 0, 0], [0, 0, 0, 0], [1, 1, 1, 1]]
-
 
 # Board is:
 #
@@ -51,12 +50,10 @@ def draw_BW_board() :
 OUTLINE = 2
 PADDING = 15
 radius = SQUARE_SIZE // 2 - PADDING
-distanceFromEdge = 150
-margin = 0 # This sets the margin between each cell
 
 
 # function to determine the square that we click
-# always returns 0 0
+# NOT OKAY always returns 0 0
 def getPos():
     pos = pygame.mouse.get_pos()
     col = (pos[0] - PADDING) // (WIDTH + OUTLINE)
@@ -75,20 +72,24 @@ def drawCircle():
 def draw_pieces() :
     for row in range(ROWS):
         for col in range(COLS) :
-            # x, y = col * SQUARE_SIZE, col * SQUARE_SIZE
-            # # red for opponent
-            # pygame.draw.circle(screen, RED, (col, col), radius, radius + OUTLINE)
-            # # green for player
-            # pygame.draw.circle(screen, GREEN, (ROWS - 1, col), radius, radius + OUTLINE)
-            xCoordinate = ((margin + WIDTH) * row + OUTLINE + 32) + PADDING
-            yCoordinate = (margin + HEIGHT) * col + OUTLINE + 33
-            if board[row][col] == 1 :
-                pygame.draw.circle(screen, RED, (xCoordinate, yCoordinate), radius)
+            # get coordinates
+            x, y = row * SQUARE_SIZE, col * SQUARE_SIZE - PADDING
+            # red for opponent
+            if board[row][col] == 2:
+                pygame.draw.circle(screen, RED, (y + radius + 2 * PADDING + OUTLINE, x + radius + PADDING + OUTLINE), radius)
+                # # green for player
+                # pygame.draw.circle(screen, GREEN, (ROWS - 1, col), radius, radius + OUTLINE)
+                xCoordinate = ((OUTLINE + WIDTH) * row + OUTLINE + 32) + PADDING
+                yCoordinate = (OUTLINE + HEIGHT) * col + OUTLINE + 33
+            # green for player
+            elif board[row][col] == 1 :
+                pygame.draw.circle(screen, GREEN, (y + radius + 2*PADDING + OUTLINE, x + radius + PADDING + OUTLINE), radius)
                 # Draw a white outline around edge of black pieces so they are visible
                 # when placed on black game board squares.
                 # pygame.draw.circle(screen, RED, (xCoordinate, yCoordinate), radius, 1)
-            if board[row][col] == 2 :
-                pygame.draw.circle(screen, RED, (xCoordinate, yCoordinate), radius)
+            # empty square - do nothing
+            else:
+                continue
 
 
 
