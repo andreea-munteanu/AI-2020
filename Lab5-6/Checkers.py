@@ -20,8 +20,15 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))   # window dimensions
 pygame.display.set_caption('Simple Checkers')       # title
 icon = pygame.image.load('board.png')               # icon
 pygame.display.set_icon(icon)
-board = [[2, 2, 2, 2], [0, 0, 0, 0], [0, 0, 0, 0], [1, 1, 1, 1]]
+# initially, all pieces are placed on rows 0 and 3
+board = [[2, 2, 2, 2],
+         [0, 0, 0, 0],
+         [0, 0, 0, 0],
+         [1, 1, 1, 1]] # --> initial state
 
+OUTLINE = 2
+PADDING = 15
+radius = SQUARE_SIZE // 2 - PADDING   # radius = 47
 # Board is:
 #
 # 2 2 2 2 ----> red (compuuter)
@@ -38,7 +45,7 @@ def print_board(matrix):
 # print_board(board)
 
 # draw B&W board
-def draw_BW_board() :
+def draw_BW_board() : # works
     screen.fill(WHITE)
     for row in range(ROWS) :
         for col in range(row % 2, COLS, 2) :
@@ -47,9 +54,23 @@ def draw_BW_board() :
                                              SQUARE_SIZE, SQUARE_SIZE))
 
 
-OUTLINE = 2
-PADDING = 15
-radius = SQUARE_SIZE // 2 - PADDING
+# draw green and red pieces
+def draw_pieces() : # works
+    for row in range(ROWS):
+        for col in range(COLS) :
+            # get coordinates
+            x, y = row * SQUARE_SIZE, col * SQUARE_SIZE - PADDING
+            # red for opponent
+            if board[row][col] == 2:
+                pygame.draw.circle(screen, RED, (y + radius + 2 * PADDING + OUTLINE, x + radius + PADDING + OUTLINE), radius)
+                # xCoordinate = ((OUTLINE + WIDTH) * row + OUTLINE + 32) + PADDING
+                # yCoordinate = (OUTLINE + HEIGHT) * col + OUTLINE + 33
+            # green for player
+            elif board[row][col] == 1 :
+                pygame.draw.circle(screen, GREEN, (y + radius + 2*PADDING + OUTLINE, x + radius + PADDING + OUTLINE), radius)
+            # empty square - do nothing
+            else:
+                continue
 
 
 # function to determine the square that we click
@@ -60,76 +81,21 @@ def getPos():
     row = pos[1] // (HEIGHT + OUTLINE)
     return row, col
 
+# should work
+def getColor(pos):
+    x = pos[0]
+    y = pos[1]
+    if board[x][y] == 1:
+        return GREEN
+    elif board[x][y] == 2:
+        return RED
+
 # drawing circle inside square
-def drawCircle():
+def drawCircle(pos):
     # Change the x/y screen coordinates to grid coordinates
-    row, col = getPos()
+    color = getColor(pos)
     # determine square and draw circle there
-    pygame.draw.circle(screen, RED, (row, col), 20)
-
-
-# draw green and red pieces
-def draw_pieces() :
-    for row in range(ROWS):
-        for col in range(COLS) :
-            # get coordinates
-            x, y = row * SQUARE_SIZE, col * SQUARE_SIZE - PADDING
-            # red for opponent
-            if board[row][col] == 2:
-                pygame.draw.circle(screen, RED, (y + radius + 2 * PADDING + OUTLINE, x + radius + PADDING + OUTLINE), radius)
-                # # green for player
-                # pygame.draw.circle(screen, GREEN, (ROWS - 1, col), radius, radius + OUTLINE)
-                xCoordinate = ((OUTLINE + WIDTH) * row + OUTLINE + 32) + PADDING
-                yCoordinate = (OUTLINE + HEIGHT) * col + OUTLINE + 33
-            # green for player
-            elif board[row][col] == 1 :
-                pygame.draw.circle(screen, GREEN, (y + radius + 2*PADDING + OUTLINE, x + radius + PADDING + OUTLINE), radius)
-                # Draw a white outline around edge of black pieces so they are visible
-                # when placed on black game board squares.
-                # pygame.draw.circle(screen, RED, (xCoordinate, yCoordinate), radius, 1)
-            # empty square - do nothing
-            else:
-                continue
-
-
-
-# def create_board(self):
-#     for row in range(ROWS):
-#         self.board.append([])
-#         for col in range(COLS):
-#             if col % 2 == ((row + 1) % 2):
-#                 if row == 0:
-#                     self.board[row].append(Piece(row, col, GREEN))
-#                 elif row == 4:
-#                     self.board[row].append(Piece(row, col, RED))
-#                 else:
-#                     self.board[row].append(0)
-#             else:
-#                 self.board[row].append(0)
-
-
-# def minimax():
-#     def simulate_move(piece, move, board, game, skip):
-#         board.move(piece, move[0], move[1])
-#         if skip:
-#             board.remove(skip)
-#         return board
-#
-#     def get_possible_moves(position, color, game):
-#         moves = [[board, piece]]
-#         for piece in board.get_all_pieces(color):
-#             valid_moves = board.get_valid_moves(piece)
-#             (row, col): [pieces]
-#             for move, skip in valid_moves.items():
-#                 temp_board = deepcopy(board)
-#                 new_board = simulate_move(piece, move, temp_board, game, skip)
-#                 moves.append([new_board, piece])
-#         return moves
-#
-#     if max_player:
-#         max_eval = float('-inf')
-#         optimal_move = None
-#         for move in get_possible_moves():
+    pygame.draw.circle(screen, color, (pos[0] + radius + 2 * PADDING + OUTLINE, pos[1] + radius + PADDING + OUTLINE), radius)
 
 
 def get_piece(row, col) :
@@ -159,7 +125,8 @@ def main() :
             if event.type == pygame.QUIT :
                 running = False
             elif event.type == pygame.MOUSEBUTTONDOWN :
-                drawCircle()
+                pos = getPos() # pos[0][1]
+                drawCircle(pos)
         pygame.display.update()
         pygame.display.flip()
     pygame.quit()
